@@ -8,7 +8,7 @@ setup(name='drawDECam',
       description = "A simple set of matplotlib API to draw DECam shapes using Plot and/or Polygons",
       author = "Felipe Menanteau",
       author_email = "felipe@illinois.edu",
-      packages = ['despyastro'],
+      packages = ['drawDECam'],
       package_dir = {'': 'python'},
       )
 
