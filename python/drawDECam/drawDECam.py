@@ -12,7 +12,7 @@ Purpose:
 Requirements:
  matplotlib (obviously)
  numpy 
- despyutils (needs wcsutil only)
+ despyastro (needs wcsutil only)
  
 Examples:
 
@@ -63,7 +63,7 @@ from matplotlib.collections import PatchCollection
 from matplotlib.collections import PolyCollection
 # wcsutil to go to the sky!
 import numpy
-import wcsutil # inside despyutils
+from despyastro import wcsutil 
 
 ################################################ Hard Coded constants
 ### for DECam, a set of list/arrays and dictionaries are hard-coded
