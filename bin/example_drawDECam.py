@@ -2,7 +2,7 @@
 
 import numpy
 import matplotlib.pyplot as plt
-from despyutils import drawDECam as dDECam
+from drawDECam import drawDECam as dDECam
 
 def examples_DECam():
 
