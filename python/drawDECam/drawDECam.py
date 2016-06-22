@@ -1,11 +1,6 @@
 #!/usr/bin/env python
 
 """
- $Id:$
- $Rev::                                  $:  # Revision of last commit.
- $LastChangedBy::                        $:  # Author of last commit.
- $LastChangedDate::                      $:  # Date of last commit.
-
 Purpose:
  A simple set of matplotlib API to draw DECam shapes using Plot and/or Polygons.
 
@@ -350,6 +345,113 @@ def createDECam_TANheader(ra_center,dec_center,pixscale=0.27):
     for k, v in DECam_header.items():
         DECam_header[k.lower()] = v
     return DECam_header
+
+
+def getDECamCorners(header):
+
+    """
+    Get the DECam profile corners for a given header and WCS
+    """
+
+    wcs    = wcsutil.WCS(header)
+    nx = header['NAXIS1']
+    ny = header['NAXIS2']
+    ra0,dec0 =  wcs.image2sky(nx/2.0,ny/2.0)
+    DECam_header = createDECam_TANheader(ra0,dec0)
+    DECam_wcs    = wcsutil.WCS(DECam_header)
+    r,d = DECam_wcs.image2sky(DECAM_CORNERS_X,DECAM_CORNERS_Y)
+    x,y = wcs.sky2image(r,d)
+    return x,y
+
+def getDECamCCDs(header,plot=False,trim=True,**kwargs):
+
+    """
+    Get the x,y positions of the DECam CCDs for a given header
+    with WCS and plot them (optional)
+    """
+
+    wcs    = wcsutil.WCS(header)
+    nx = header['NAXIS1']
+    ny = header['NAXIS2']
+    ra0,dec0 =  wcs.image2sky(nx/2.0,ny/2.0)
+    DECam_header = createDECam_TANheader(ra0,dec0)
+    DECam_wcs    = wcsutil.WCS(DECam_header)
+
+    if plot:
+        ax = plt.gca()
+    if trim:
+        SECTIONS = TRIM_CCDSECTIONS
+    else:
+        SECTIONS = CCDSECTIONS
+
+    ccds = {}
+    for k,v in SECTIONS.items():
+        (x1,x2,y1,y2) = v
+        if plot:
+            DECam_x = [x1,x2,x2,x1,x1]
+            DECam_y = [y1,y1,y2,y2,y1]
+            r_plot,d_plot = DECam_wcs.image2sky(DECam_x,DECam_y) # Into RA,DEC
+            x_plot,y_plot = wcs.sky2image(r_plot,d_plot)
+            ax.plot(x_plot,y_plot,**kwargs)
+            
+        r,d = DECam_wcs.image2sky([x1,x2],[y1,y2])
+        x,y = wcs.sky2image(r,d)
+        # Make the the interger (pixels)
+        x = numpy.ceil(x).astype(int)
+        y = numpy.ceil(y).astype(int)
+        # Sort them to get the slices right
+        x.sort()
+        y.sort()
+        ccds[k] = x.tolist(),y.tolist() # We get back lists
+    return ccds
+
+
+
+def DECamMask(header,plot=False,**kw):
+
+    """
+    Make a mask with 1 or 0 with the shape of DECam for an input
+    header object with a WCS
+    """
+    # Get the ccds
+    ccds = getDECamCCDs(header,plot=plot,**kw)
+
+    nx = header['NAXIS1']
+    ny = header['NAXIS2']
+    mask = numpy.zeros((ny,nx),dtype=int)
+    for k in ccds.keys():
+        # Unpack the edges
+        [x1,x2],[y1,y2] = ccds[k]
+        mask[y1:y2,x1:x2] = 1
+
+    return mask
+
+
+def DECamMask2(filename,plot=False,**kw):
+
+    import fitsio
+
+    data,header = fitsio.read(filename, ext=0, header=True)
+    print "# Done reading %s" % filename
+
+    newdata = (data*0).astype('float32')
+
+    """
+    Make a mask with 1 or 0 with the shape of DECam for an input
+    header object with a WCS
+    """
+    # Get the ccds
+    ccds = getDECamCCDs(header,plot=plot,**kw)
+
+    #nx = header['NAXIS1']
+    #ny = header['NAXIS2']
+    #mask = numpy.zeros((ny,nx),dtype=int)
+    for k in ccds.keys():
+        # Unpack the edges
+        [x1,x2],[y1,y2] = ccds[k]
+        newdata[y2:y1,x2:x1] = data[y2:y1,x2:x1]  
+    return newdata
+
 
 
 def rotate_xy(x,y,theta,x0=0,y0=0,units='degrees'):
