@@ -405,9 +405,7 @@ def getDECamCCDs(header,plot=False,trim=True,**kwargs):
         ccds[k] = x.tolist(),y.tolist() # We get back lists
     return ccds
 
-
-
-def DECamMask(header,plot=False,**kw):
+def getDECamMask(header,plot=False,**kw):
 
     """
     Make a mask with 1 or 0 with the shape of DECam for an input
@@ -415,7 +413,6 @@ def DECamMask(header,plot=False,**kw):
     """
     # Get the ccds
     ccds = getDECamCCDs(header,plot=plot,**kw)
-
     nx = header['NAXIS1']
     ny = header['NAXIS2']
     mask = numpy.zeros((ny,nx),dtype=int)
@@ -423,35 +420,26 @@ def DECamMask(header,plot=False,**kw):
         # Unpack the edges
         [x1,x2],[y1,y2] = ccds[k]
         mask[y1:y2,x1:x2] = 1
-
     return mask
 
+def addDECamMask(filename,outname,plot=False,**kw):
 
-def DECamMask2(filename,plot=False,**kw):
-
-    import fitsio
-
+    """
+    Mask a fitsfile with the DECam shape
+    """
     data,header = fitsio.read(filename, ext=0, header=True)
     print "# Done reading %s" % filename
 
-    newdata = (data*0).astype('float32')
+    masked_data = numpy.zeros(data.shape,dtype=data.dtype)
 
-    """
-    Make a mask with 1 or 0 with the shape of DECam for an input
-    header object with a WCS
-    """
     # Get the ccds
     ccds = getDECamCCDs(header,plot=plot,**kw)
-
-    #nx = header['NAXIS1']
-    #ny = header['NAXIS2']
-    #mask = numpy.zeros((ny,nx),dtype=int)
     for k in ccds.keys():
         # Unpack the edges
         [x1,x2],[y1,y2] = ccds[k]
-        newdata[y2:y1,x2:x1] = data[y2:y1,x2:x1]  
-    return newdata
-
+        masked_data[y1:y2,x1:x2] = data[y1:y2,x1:x2]  
+    fitsio.write(outname,masked_data,header=header,clobber=True)
+    return 
 
 
 def rotate_xy(x,y,theta,x0=0,y0=0,units='degrees'):
