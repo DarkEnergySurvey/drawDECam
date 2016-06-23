@@ -422,26 +422,6 @@ def getDECamMask(header,plot=False,**kw):
         mask[y1:y2,x1:x2] = 1
     return mask
 
-def addDECamMask(filename,outname,plot=False,**kw):
-
-    """
-    Mask a fitsfile with the DECam shape
-    """
-    data,header = fitsio.read(filename, ext=0, header=True)
-    print "# Done reading %s" % filename
-
-    masked_data = numpy.zeros(data.shape,dtype=data.dtype)
-
-    # Get the ccds
-    ccds = getDECamCCDs(header,plot=plot,**kw)
-    for k in ccds.keys():
-        # Unpack the edges
-        [x1,x2],[y1,y2] = ccds[k]
-        masked_data[y1:y2,x1:x2] = data[y1:y2,x1:x2]  
-    fitsio.write(outname,masked_data,header=header,clobber=True)
-    return 
-
-
 def rotate_xy(x,y,theta,x0=0,y0=0,units='degrees'):
     """
     Rotates (x,y) by angle theta and (x0,y0) translation
