@@ -422,6 +422,65 @@ def getDECamMask(header,plot=False,**kw):
         mask[y1:y2,x1:x2] = 1
     return mask
 
+
+def make_hex_grid(nx,ny):
+
+    import numpy as np
+
+    """ Make overlapping hexagons grid"""
+
+    # Even
+    if nx % 2 == 0:
+        NX = nx + 1
+    else:
+        NX = nx
+    if ny % 2 == 0:
+        NY = ny + 1
+    else:
+        NY = ny
+
+    DY = (NY-1)/2.0
+    DX = (NX-1)/2.0
+    iy = numpy.linspace(-DY,+DY,NY)
+    ix = numpy.linspace(-DX,+DX,NX)
+
+    x = numpy.array([])
+    y = numpy.array([])
+    for j in range(NY):
+        for i in range(NX):
+            if iy[j] % 2 == 0:
+                xnew = ix
+            else:
+                xnew = ix[:-1] + 0.5
+
+            x = numpy.concatenate((x,xnew))
+            y = numpy.concatenate((y,xnew*0 + iy[j]))
+
+    return x,y
+
+def make_DECam_grid(ra0,dec0,nx=3,ny=3, DX=2.3, DY=2.4):
+
+    # Space between DECam centers in RA (DX) and DEC (DY)
+    # Make the overlapping pattern of nx,ny, get the centers
+    x,y = make_hex_grid(3,3)
+
+    dDEC = DY
+    dec = y*dDEC/2.0 + dec0
+
+    dRA = DX/numpy.cos(dec*math.pi/180.)
+    ra  = x*dRA  + ra0
+
+    d1 = dec.min() - 1.5
+    d2 = dec.max() + 1.5
+    d0 = (d2+d1)/2.0
+    r1 = ra.min() - 1.5/math.cos(d0*math.pi/180.)
+    r2 = ra.max() + 1.5/math.cos(d0*math.pi/180.)
+
+    dec_range = abs(d2 - d1)
+    ra_range  = abs(r2 - r1)
+ 
+    return ra,dec 
+
 def rotate_xy(x,y,theta,x0=0,y0=0,units='degrees'):
     """
     Rotates (x,y) by angle theta and (x0,y0) translation

@@ -3,6 +3,42 @@
 import numpy
 import matplotlib.pyplot as plt
 from drawDECam import drawDECam as dDECam
+import math
+
+def drawGrid_DECam():
+
+    # The center of the grid
+    ra0  =  21.32981300
+    dec0 = -44.56367600
+
+    # Get the pattern
+    ra,dec = dDECam.make_DECam_grid(ra0,dec0,nx=3,ny=3)
+
+    d1 = dec.min() - 1.5
+    d2 = dec.max() + 1.5
+    d0 = (d2+d1)/2.0
+    r1 = ra.min() - 1.5/math.cos(d0*math.pi/180.)
+    r2 = ra.max() + 1.5/math.cos(d0*math.pi/180.)
+
+    dec_range = abs(d2 - d1)
+    ra_range  = abs(r2 - r1)
+
+    print "# Fig 5: DECam Grid corners in the sky"
+    aspect = dec_range/(ra_range*math.cos(d0*math.pi/180.))
+    plt.figure(5,figsize=(10,10*aspect))
+
+    for r,d in zip(ra,dec):
+        dDECam.drawDECamCorners_Sky(r,d,pixscale=0.27,color='k',lw=0.5,ls='-')
+
+    # Make the center in red
+    dDECam.drawDECamCorners_Sky(ra0,dec0,pixscale=0.27,color='r',lw=1.5,ls='-')
+
+    plt.xlim(r1,r2)
+    plt.ylim(d1,d2)
+    plt.xlabel('R.A.')
+    plt.ylabel('Dec.')
+    plt.title("DECam Corners Sky")
+    plt.show()
 
 def examples_DECam():
 
@@ -68,8 +104,10 @@ def examples_DECam():
     plt.ylabel('Dec.')
     plt.title("DECam CCDs Sky")
     
-    plt.show()
     return
 
 if __name__ == "__main__":
     examples_DECam()
+    drawGrid_DECam()
+    plt.show()
+    
