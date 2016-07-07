@@ -447,14 +447,13 @@ def make_hex_grid(nx,ny):
     x = numpy.array([])
     y = numpy.array([])
     for j in range(NY):
-        for i in range(NX):
-            if iy[j] % 2 == 0:
-                xnew = ix
-            else:
-                xnew = ix[:-1] + 0.5
+        if iy[j] % 2 == 0:
+            xnew = ix
+        else:
+            xnew = ix[:-1] + 0.5
 
-            x = numpy.concatenate((x,xnew))
-            y = numpy.concatenate((y,xnew*0 + iy[j]))
+        x = numpy.concatenate((x,xnew))
+        y = numpy.concatenate((y,xnew*0 + iy[j]))
 
     return x,y
 
