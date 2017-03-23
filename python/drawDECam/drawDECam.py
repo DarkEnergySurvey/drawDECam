@@ -282,7 +282,7 @@ def drawDECamCorners_Polygon(x0,y0,rotate=True,draw=True,**kwargs):
     if draw: plt.draw()
     return
 
-def drawDECamCorners_Sky(ra,dec,pixscale=0.27,label=False,**kwargs):
+def drawDECamCorners_Sky(ra,dec,pixscale=0.27,label=False,units='deg',**kwargs):
 
     """ Draws DECam Corners on the sky (RA,DEC) using matplotlib Plot function on the current plot"""
 
@@ -291,10 +291,18 @@ def drawDECamCorners_Sky(ra,dec,pixscale=0.27,label=False,**kwargs):
 
     r,d = wcs.image2sky(DECAM_CORNERS_X,DECAM_CORNERS_Y) # Into RA,DEC
     ax = plt.gca()
+
+    if units == 'rad':
+        r,d = deg2rad(r,d)
+
     ax.plot(r,d,**kwargs)
+        
     if label: # Probably will never use
-        r0,d0 =  wcs.image2sky(ra,dec)
-        ax.text(r,d, label, ha='center',va='center')
+        if units == 'rad':
+            r0,d0 = deg2rad(numpy.array([ra]),numpy.array([dec]))
+        else:
+            r0,d0 = ra,dec
+        ax.text(r0,d0, label, ha='center',va='center')
     return
 
 def drawDECamCCDs_Sky(ra,dec,trim=True,pixscale=0.27,label=False,**kwargs):
@@ -548,6 +556,17 @@ def PCircle((xo,yo), radius, resolution=100, **kwargs):
     x = xtmp + xo;
     y = ytmp + yo;
     return Polygon(zip(x, y), **kwargs)
+
+
+def deg2rad(RA,Dec,org=0):
+
+    x = numpy.remainder(RA+360-org,360) # shift RA values
+    ind = x>180
+    x[ind] -=360    # scale conversion to [-180, 180]
+    x=-x    # reverse the scale: East to the left
+    x_rad = numpy.radians(x)
+    y_rad = numpy.radians(Dec)
+    return x_rad,y_rad
 
 def run_tests():
 
