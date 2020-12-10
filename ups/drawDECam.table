@@ -1,4 +1,5 @@
-setupRequired(matplotlib 1.3.1+6)
-setupRequired(despyastro 0.3.8+1)
+setupRequired(matplotlib 3.1.2+2)
+setupRequired(despyastro 3.0.1+1)
+
 envAppend(PYTHONPATH, ${PRODUCT_DIR}/python)
 envAppend(PATH, ${PRODUCT_DIR}/bin)

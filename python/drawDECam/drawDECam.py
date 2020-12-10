@@ -144,7 +144,7 @@ CCDSECTION_Y0 = (CCDSECTIONS[35][2] + CCDSECTIONS[28][3]) / 2.0
 # Create the TRIM_CCDSECTION
 TRIM_CCDSECTIONS = CCDSECTIONS.copy()
 borderpix = 104  # 208/2. as 208 is the space between chips in pixels
-for _k, _v in TRIM_CCDSECTIONS.items():
+for _k, _v in list(TRIM_CCDSECTIONS.items()):
     (_x1, _x2, _y1, _y2) = _v
     _x1 = _x1 + borderpix
     _x2 = _x2 - borderpix
@@ -216,7 +216,7 @@ def drawDECamCCDs_Polygon(
         SECTIONS = CCDSECTIONS
 
     patches = []
-    for k, v in SECTIONS.items():
+    for k, v in list(SECTIONS.items()):
         (x1, x2, y1, y2) = v
         if rotate:
             x1, y1 = rotate_xy(x1, y1, theta=-90, x0=x0, y0=y0)
@@ -227,7 +227,7 @@ def drawDECamCCDs_Polygon(
 
         x = numpy.array([x1, x2, x2, x1])
         y = numpy.array([y1, y1, y2, y2])
-        P = Polygon(zip(x, y), **kwargs)
+        P = Polygon(list(zip(x, y)), **kwargs)
         patches.append(P)
         if label:
             ax.text(0.5 * (x2 + x1), 0.5 * (y2 + y1), "CCD%s" %
@@ -248,7 +248,7 @@ def drawDECamCCDs_Plot(x0, y0, trim=True, rotate=True, label=False, **kwargs):
         SECTIONS = TRIM_CCDSECTIONS
     else:
         SECTIONS = CCDSECTIONS
-    for k, v in SECTIONS.items():
+    for k, v in list(SECTIONS.items()):
         (x1, x2, y1, y2) = v
         if rotate:
             x1, y1 = rotate_xy(x1, y1, theta=-90, x0=x0, y0=y0)
@@ -294,7 +294,7 @@ def drawDECamCorners_Polygon(x0, y0, rotate=True, draw=True, **kwargs):
     else:
         x, y = rotate_xy(DECAM_CORNERS_X, DECAM_CORNERS_Y,
                          theta=0, x0=x0, y0=y0)
-    P = Polygon(zip(x[:-1], y[:-1]), **kwargs)
+    P = Polygon(list(zip(x[:-1], y[:-1])), **kwargs)
     ax.add_patch(P)
     if draw:
         plt.draw()
@@ -343,7 +343,7 @@ def drawDECamCCDs_Sky(ra, dec, trim=True, pixscale=0.27,
         SECTIONS = TRIM_CCDSECTIONS
     else:
         SECTIONS = CCDSECTIONS
-    for k, v in SECTIONS.items():
+    for k, v in list(SECTIONS.items()):
         (x1, x2, y1, y2) = v
         x = numpy.array([x1, x2, x2, x1, x1])
         y = numpy.array([y1, y1, y2, y2, y1])
@@ -378,7 +378,7 @@ def createDECam_TANheader(ra_center, dec_center, pixscale=0.27):
     }
 
     # Now for consistecy, add lower-case keys, to make it 'case-insensity' fake
-    for k, v in DECam_header.items():
+    for k, v in list(DECam_header.items()):
         DECam_header[k.lower()] = v
     return DECam_header
 
@@ -420,7 +420,7 @@ def getDECamCCDs(header, plot=False, trim=True, **kwargs):
         SECTIONS = CCDSECTIONS
 
     ccds = {}
-    for k, v in SECTIONS.items():
+    for k, v in list(SECTIONS.items()):
         (x1, x2, y1, y2) = v
         if plot:
             DECam_x = [x1, x2, x2, x1, x1]
@@ -452,7 +452,7 @@ def getDECamMask(header, plot=False, **kw):
     nx = header['NAXIS1']
     ny = header['NAXIS2']
     mask = numpy.zeros((ny, nx), dtype=int)
-    for k in ccds.keys():
+    for k in list(ccds.keys()):
         # Unpack the edges
         [x1, x2], [y1, y2] = ccds[k]
         mask[y1:y2, x1:x2] = 1
@@ -548,7 +548,7 @@ def PEllipse(xxx_todo_changeme, xxx_todo_changeme1,
 
     x = xtmp * cos(angle) - ytmp * sin(angle) + xo
     y = xtmp * sin(angle) + ytmp * cos(angle) + yo
-    return Polygon(zip(x, y), **kwargs)
+    return Polygon(list(zip(x, y)), **kwargs)
 
 
 def PEllipse_multi(xxx_todo_changeme2, xxx_todo_changeme3,
@@ -568,7 +568,7 @@ def PEllipse_multi(xxx_todo_changeme2, xxx_todo_changeme3,
         ytmp = B[k] * numpy.sin(t)
         x = xtmp * cos(angle[k]) - ytmp * sin(angle[k]) + xo[k]
         y = xtmp * sin(angle[k]) + ytmp * cos(angle[k]) + yo[k]
-        verts.append(zip(x, y))
+        verts.append(list(zip(x, y)))
 
     verts = numpy.array(verts)
     coll = PolyCollection(verts, **kwargs)
@@ -587,7 +587,7 @@ def PCircle(xxx_todo_changeme4, radius, resolution=100, **kwargs):
     ytmp = radius * numpy.sin(t)
     x = xtmp + xo
     y = ytmp + yo
-    return Polygon(zip(x, y), **kwargs)
+    return Polygon(list(zip(x, y)), **kwargs)
 
 
 def deg2rad(RA, Dec, org=0):
